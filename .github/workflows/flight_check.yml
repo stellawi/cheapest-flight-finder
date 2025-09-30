@@ -57,3 +57,5 @@ jobs:
                   else
                     echo "No flights.db found; nothing to persist"
                   fi
+permissions:
+    contents: write # to allow pushing the DB file back to the repo
