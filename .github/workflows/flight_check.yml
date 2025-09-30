@@ -1,0 +1,59 @@
+name: Flight price checker
+
+on:
+    schedule:
+        # runs daily at 08:00 UTC (adjust as needed). To run at 00:00 SGT (UTC+8) use '0 16 * * *'
+        - cron: "0 8 * * *"
+    workflow_dispatch: {} # allows manual runs from the Actions tab
+
+jobs:
+    check_flights:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  persist-credentials: true
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.10"
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+
+            - name: Run flight checker
+              env:
+                  AMADEUS_CLIENT_ID: ${{ secrets.AMADEUS_CLIENT_ID }}
+                  AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+                  ORIGIN: ${{ secrets.ORIGIN }}
+                  DEPART_DATE: ${{ secrets.DEPART_DATE }}
+                  RETURN_DATE: ${{ secrets.RETURN_DATE }}
+              run: |
+                  python cheapest_flight_finder.py
+
+            - name: Commit & push flights.db (persistence)
+              # This will add flights.db to the repository (created by the script) so the DB persists.
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  # ensure we are on the branch that triggered the workflow
+                  git checkout $GITHUB_REF_NAME || true
+                  # Add DB if exists
+                  if [ -f "flights.db" ]; then
+                    git add flights.db
+                    if [ -n "$(git status --porcelain)" ]; then
+                      git commit -m "Update flights.db from GitHub Actions run $(date -u +"%Y-%m-%d %H:%M:%SZ")" || echo "commit failed"
+                      git push origin HEAD:${{ github.ref_name }}
+                    else
+                      echo "No DB changes to commit"
+                    fi
+                  else
+                    echo "No flights.db found; nothing to persist"
+                  fi
