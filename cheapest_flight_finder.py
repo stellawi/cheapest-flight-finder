@@ -115,7 +115,7 @@ def send_telegram_alert(amadeus, flight_offer: FlightOffer, telegram_token: str,
         message_lines.append(f"Segment {idx+1}: {origin} → {destination} | {airline_name} ({airline_code}) | {departure_date}")
         itinerary_link_parts.append(f"{origin}.{destination}.{departure_date}")
 
-    message_lines.append(f"Total Price: USD {flight_offer.price}")
+    message_lines.append(f"Total Price: SGD {flight_offer.price}")
     booking_link = "https://www.google.com/flights?hl=en#flt=" + "*".join(itinerary_link_parts)
     message_lines.append(f"[Book here]({booking_link})")
 
