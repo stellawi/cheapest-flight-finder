@@ -1,33 +1,35 @@
 name: Daily Cheapest Flight Check
 
 on:
-    schedule:
-        - cron: "0 9 * * *" # Every day at 09:00 UTC (adjust to your timezone)
-    workflow_dispatch: # Allows manual triggering
+  schedule:
+    - cron: "0 1 * * *"  # Runs daily at 09:00 Singapore time (01:00 UTC)
+  workflow_dispatch:       # Manual trigger allowed
 
 jobs:
-    flight_check:
-        runs-on: ubuntu-latest
+  flight_check:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install python-dotenv amadeus requests
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-dotenv amadeus requests
 
-            - name: Run flight finder
-              env:
-                  AMADEUS_CLIENT_ID: ${{ secrets.AMADEUS_CLIENT_ID }}
-                  AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
-                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-              run: |
-                  python cheapest_flight_finder.py
+      - name: Run flight finder
+        env:
+          AMADEUS_CLIENT_ID: ${{ secrets.AMADEUS_CLIENT_ID }}
+          AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MAX_PRICE: ${{ secrets.MAX_PRICE }}  # SGD threshold for alerts
+          PREFER_SAME_AIRLINE: ${{ secrets.PREFER_SAME_AIRLINE }}  # true/false
+        run: |
+          python cheapest_flight_finder.py
