@@ -1,31 +1,29 @@
-name: Cheapest Flight Finder
+name: Daily Cheapest Flight Check
 
 on:
     schedule:
-        # Runs every day at 08:00 UTC (adjust if needed)
-        - cron: "0 8 * * *"
-    workflow_dispatch: # lets you run it manually from GitHub
+        - cron: "0 9 * * *" # Every day at 09:00 UTC (adjust to your timezone)
+    workflow_dispatch: # Allows manual triggering
 
 jobs:
-    run-script:
+    flight_check:
         runs-on: ubuntu-latest
-        permissions:
-            contents: read # no write needed, avoids the 403 error
+
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+            - name: Checkout repo
+              uses: actions/checkout@v3
 
             - name: Set up Python
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@v4
               with:
                   python-version: "3.11"
 
             - name: Install dependencies
               run: |
                   python -m pip install --upgrade pip
-                  pip install -r requirements.txt
+                  pip install python-dotenv amadeus requests
 
-            - name: Run script
+            - name: Run flight finder
               env:
                   AMADEUS_CLIENT_ID: ${{ secrets.AMADEUS_CLIENT_ID }}
                   AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
