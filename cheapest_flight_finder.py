@@ -27,8 +27,8 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 DB_PATH = "flights.db"
 AUSTRIA_AIRPORTS = ["VIE", "SZG", "GRZ", "INN", "LNZ"]
 ORIGIN = os.getenv("ORIGIN", "SIN")
-DEPART_DATE = os.getenv("DEPART_DATE", "2025-06-15")
-RETURN_DATE = os.getenv("RETURN_DATE", "2025-07-01") or None
+DEPART_DATE = os.getenv("DEPART_DATE", "2026-08-22")
+RETURN_DATE = os.getenv("RETURN_DATE", "2026-09-06") or None
 
 # --- Data Classes ---
 @dataclass
